@@ -7,16 +7,19 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class MitraDashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $barbershops = Auth::user()->barbershops; // Ambil barbershop milik mitra yang sedang login
+        $user = Auth::user();   // Ambil user yang sedang login
+        $barbershops = $user->barbershops;  // Ambil barbershop milik mitra yang sedang login
         $barbershopIds = $barbershops->pluck('id'); // Ambil ID barbershop untuk digunakan dalam query
 
-        // Inisialisasi variabel untuk statistik
+
+        // Statistik untuk dashboard mitra
         $totalBookings = 0;
         $todayBookings = 0;
         $totalPendapatanHariIni = 0;
@@ -36,13 +39,78 @@ class MitraDashboardController extends Controller
             ->whereDate('completed_at', Carbon::today())
             ->sum('total_price'); // Secara langsung jumlahkan total harga dari booking yang selesai hari ini
         }
-        // Kembalikan view dengan data yang diperlukan
+        // mengambil data mingguan untuk chart awal
+        $initialChartData = $this->prepareChartData('weekly', $barbershopIds);
+
         return view('dashboard-mitra', compact(
                 'barbershops',
                 'totalBookings',
                 'todayBookings',
-                'totalPendapatanHariIni'
+                'totalPendapatanHariIni',
+                'initialChartData'
         ));
+    }
+    //mendapatkan data chart menggunakan AJAX (untuk real-time update)
+    public function getChartData(Request $request)
+    {
+        $range = $request->input('range', 'weekly'); // Ambil rentang waktu dari request, default ke 'weekly'
+        $barbershopIds = Auth::user()->barbershops->pluck('id'); // Ambil ID barbershop milik mitra yang sedang login
+
+        $chartData = $this->prepareChartData($range, $barbershopIds);
+
+        return response()->json($chartData);
+    }
+    // NEW PRIVATE HELPER METHOD to avoid repeating code
+    private function prepareChartData($range, $barbershopIds)
+    {
+        $chartLabels = [];
+        $chartDataPoints = [];
+
+        switch ($range) {
+            case 'monthly':
+                $startDate = Carbon::now()->subDays(30);
+                $bookingsData = Booking::whereIn('barbershop_id', $barbershopIds)
+                    ->where('booking_time', '>=', $startDate)
+                    ->select(DB::raw('DATE(booking_time) as date'), DB::raw('count(*) as count'))
+                    ->groupBy('date')->orderBy('date', 'ASC')->pluck('count', 'date');
+
+                for ($i = 29; $i >= 0; $i--) {
+                    $date = Carbon::now()->subDays($i);
+                    $chartLabels[] = $date->format('d M');
+                    $chartDataPoints[] = $bookingsData[$date->format('Y-m-d')] ?? 0;
+                }
+                break;
+
+            case 'yearly':
+                $startDate = Carbon::now()->subMonths(12);
+                $bookingsData = Booking::whereIn('barbershop_id', $barbershopIds)
+                    ->where('booking_time', '>=', $startDate)
+                    ->select(DB::raw("DATE_FORMAT(booking_time, '%Y-%m') as month"), DB::raw('count(*) as count'))
+                    ->groupBy('month')->orderBy('month', 'ASC')->pluck('count', 'month');
+
+                for ($i = 11; $i >= 0; $i--) {
+                    $date = Carbon::now()->subMonths($i);
+                    $chartLabels[] = $date->format('M Y');
+                    $chartDataPoints[] = $bookingsData[$date->format('Y-m')] ?? 0;
+                }
+                break;
+
+            default: // Weekly
+                $startDate = Carbon::now()->subDays(7);
+                $bookingsData = Booking::whereIn('barbershop_id', $barbershopIds)
+                    ->where('booking_time', '>=', $startDate)
+                    ->select(DB::raw('DATE(booking_time) as date'), DB::raw('count(*) as count'))
+                    ->groupBy('date')->orderBy('date', 'ASC')->pluck('count', 'date');
+
+                for ($i = 6; $i >= 0; $i--) {
+                    $date = Carbon::now()->subDays($i);
+                    $chartLabels[] = $date->format('d M');
+                    $chartDataPoints[] = $bookingsData[$date->format('Y-m-d')] ?? 0;
+                }
+                break;
+        }
+
+        return ['labels' => $chartLabels, 'data' => $chartDataPoints];
     }
 
     public function create()

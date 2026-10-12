@@ -20,7 +20,7 @@ class Booking extends Model
         'payment_method',
         'order_id',
         'snap_token',
-        'completed_at'
+        'completed_at',
     ];
 
     protected $casts = [

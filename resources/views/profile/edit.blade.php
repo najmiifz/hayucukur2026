@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Profil - Hayu Cukur</title>
-    {{-- (Copy the <head> section from your profile/pelanggan.blade.php for consistent styling) --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -27,14 +26,19 @@
 
 <div class="container my-5">
     <div class="mb-4">
-        <a href="{{ route('profile.show') }}" class="back-link"><i class="bi bi-arrow-left"></i> Kembali ke Profil</a>
+        {{-- FIX: Conditional back link based on role --}}
+        <a href="{{ Auth::user()->role == 'mitra' ? route('profile.mitra.show') : route('profile.pelanggan.show') }}" class="back-link"><i class="bi bi-arrow-left"></i> Kembali ke Profil</a>
     </div>
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card p-4">
                 <h3 class="mb-4 fw-bold">Edit Informasi Akun</h3>
+                @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
                 <form action="{{ route('profile.update') }}" method="POST">
                     @csrf
+                    @method('PUT') {{-- Use PUT method for updates --}}
                     <div class="mb-3">
                         <label for="name" class="form-label">Nama Lengkap</label>
                         <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required>
@@ -44,6 +48,12 @@
                         <label for="email" class="form-label">Alamat Email</label>
                         <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
                         @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    {{-- ADD THE PHONE NUMBER INPUT FIELD --}}
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label">Nomor Telepon</label>
+                        <input type="text" name="phone_number" id="phone_number" class="form-control @error('phone_number') is-invalid @enderror" value="{{ old('phone_number', $user->phone_number) }}" required>
+                        @error('phone_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <hr style="border-color: #444;">
                     <p class="text-white-50">Ubah Kata Sandi (opsional)</p>

@@ -39,6 +39,7 @@
             <div class="card p-4 h-100">
                 <h4 class="mb-4">Informasi Akun</h4>
                 <p class="mb-2"><strong>Nama:</strong><br>{{ $user->name }}</p>
+                <p class="mb-0"><strong>Nomor Telepon:</strong><br>{{ $user->phone_number ?? 'Belum ditambahkan' }}</p>
                 <p class="mb-0"><strong>Email:</strong><br>{{ $user->email }}</p>
             </div>
         </div>

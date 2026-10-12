@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Barbershop;
+use App\Mail\NewBookingNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -25,6 +28,7 @@ class BookingController extends Controller
             'booking_date' => 'required|date|after_or_equal:today',
             'booking_time' => 'required|date_format:H:i',
         ]);
+        $booking = null; // Inisialisasi variabel booking
 
         $barbershop = Barbershop::findOrFail($validatedData['barbershop_id']);
         $availableServices = collect($barbershop->services ?? [])->keyBy('name');
@@ -91,7 +95,6 @@ class BookingController extends Controller
             'order_id' => $params['transaction_details']['order_id'],
             'snap_token' => $snapToken,
         ]);
-
         return view('booking.payment', compact('booking'));
     }
     public function showPayment(Request $request)
@@ -133,7 +136,7 @@ class BookingController extends Controller
             return redirect()->route('dashboard')->with('error', 'Sesi booking Anda telah berakhir.');
         }
         $bookingDateTime = Carbon::parse($details['booking_date'] . ' ' . $details['booking_time']);
-        Booking::create([
+        $booking = Booking::create([
             'user_id' => Auth::id(),
             'barbershop_id' => $details['barbershop_id'],
             'name' => Auth::user()->name, // Mengambil nama pengguna yang sedang login
@@ -142,7 +145,10 @@ class BookingController extends Controller
             'status' => 'Menunggu',
             'payment_status' => 'Pending',
             'payment_method' => 'Bayar Ditempat', // Metode pembayaran ditempat
+            'services' => $details['services'] ?? [], // Pastikan services adalah array, jika tidak ada, set sebagai array kosong
         ]);
+
+        Mail::to($booking->barbershop->user->email)->send(new NewBookingNotification($booking));
 
         $request->session()->forget('booking_details'); // Hapus detail booking dari session setelah konfirmasi
         return redirect()->route('riwayat-booking')->with('success', 'Booking berhasil dibuat, Booking Berhasil dibuat, silahkan datang ke barbershop pada waktu yang telah ditentukan.');

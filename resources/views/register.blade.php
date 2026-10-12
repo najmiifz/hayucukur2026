@@ -92,6 +92,15 @@
                 @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="mb-3">
+                <label for="phone_number" class="form-label">Nomor Telepon</label>
+                <input id="phone_number" type="text" class="form-control @error('phone_number') is-invalid @enderror" name="phone_number" value="{{ old('phone_number') }}">
+                @error('phone_number')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            <div class="mb-3">
                 <label for="password" class="form-label">Kata Sandi</label>
                 <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" id="password" required>
                 @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror

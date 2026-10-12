@@ -53,12 +53,14 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone_number' => 'required|string|max:20|unique:users,phone_number,' . $user->id,
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => ['nullable', 'confirmed', Password::min(8)],
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->phone_number = $request->phone_number;
 
         if ($request->filled('new_password')) {
             if (!$request->filled('current_password') || !Hash::check($request->current_password, $user->password)) {
@@ -69,6 +71,8 @@ class ProfileController extends Controller
 
         $user->save();
 
-        return redirect()->route('profile.show')->with('success', 'Update profile berhasil.');
+        //redirect ke halaman yang sesuai berdasarkan peran pengguna
+        $routeName = $user->role =='mitra' ? 'profile.mitra.show' : 'profile.pelanggan.show';
+        return redirect()->route($routeName)->with('success', 'Update profile berhasil.');
     }
 }

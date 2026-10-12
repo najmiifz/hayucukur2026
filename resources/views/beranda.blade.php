@@ -86,102 +86,146 @@
 
 @include('layouts.header')
 
-<header class="hero">
-    <div class="hero-content animate__animated animate__fadeIn">
-        <h1 class="fw-bold mb-4">Gaya Rambut Keren <span style="color: #fff;">Tanpa Antre</span></h1>
-        <p class="fs-4 mb-4">Temukan dan booking barbershop terbaik di sekitarmu dengan mudah.</p>
-        <a href="{{ route('register') }}" class="btn btn-gradient btn-lg">Booking Sekarang</a>
-    </div>
-</header>
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-inner">
+            {{-- Slide 1 --}}
+            <div class="carousel-item active">
+                <img src="/images/gambar1.jpeg" class="d-block w-100" style="height: 90vh; object-fit: cover; filter: brightness(50%);" alt="Slide 1">
+                <div class="carousel-caption d-none d-md-block" style="top: 50%; transform: translateY(-50%);">
+                    <h1 class="fw-bold">Gaya Rambut Keren Tanpa Antre</h1>
+                    <p class="fs-4">Temukan dan booking barbershop terbaik di sekitarmu.</p>
+                </div>
+            </div>
 
-<section class="section-padding text-center">
-    <div class="container">
-        <h2 class="fw-bold mb-5 section-title">Kenapa Pilih HayuCukur?</h2>
-        <div class="row">
-            <div class="col-md-4 mb-4"><div class="feature-card"><i class="bi bi-calendar2-check feature-icon"></i><h4 class="fw-bold">Booking Mudah</h4><p>Pilih jadwal, kapster, dan layanan sesuai keinginanmu hanya dalam beberapa klik.</p></div></div>
-            <div class="col-md-4 mb-4"><div class="feature-card"><i class="bi bi-scissors feature-icon"></i><h4 class="fw-bold">Banyak Pilihan</h4><p>Temukan barbershop dari potong rambut, jenggot, hingga creambath.</p></div></div>
-            <div class="col-md-4 mb-4"><div class="feature-card"><i class="bi bi-qr-code-scan feature-icon"></i><h4 class="fw-bold">Bayar Praktis</h4><p>Pembayaran aman dan cepat di lokasi atau langsung dari aplikasi.</p></div></div>
+            {{-- Slide 2 --}}
+            <div class="carousel-item">
+                <img src="/images/gambar2.jpg" class="d-block w-100" style="height: 90vh; object-fit: cover; filter: brightness(50%);" alt="Slide 2">
+                <div class="carousel-caption d-none d-md-block" style="top: 50%; transform: translateY(-50%);">
+                    <h1 class="fw-bold">Banyak Pilihan Gaya</h1>
+                    <p class="fs-4">Pilih dari ratusan barbershop terpercaya.</p>
+                </div>
+            </div>
+
+            {{-- Slide 3 --}}
+            <div class="carousel-item">
+                <img src="/images/gambar3.jpg" class="d-block w-100" style="height: 90vh; object-fit: cover; filter: brightness(50%);" alt="Slide 3">
+                <div class="carousel-caption d-none d-md-block" style="top: 50%; transform: translateY(-50%);">
+                    <h1 class="fw-bold">Jadwalkan Kunjungan Anda</h1>
+                    <p class="fs-4">Booking mudah dan cepat, tanpa perlu antre.</p>
+                </div>
+            </div>
         </div>
-    </div>
-</section>
 
-<section class="section-padding text-center" style="background-color: var(--darker);">
-    <div class="container">
-        <h2 class="fw-bold mb-5 section-title"><i class="bi bi-geo-alt-fill me-2"></i>Pilihan Barber Kita</h2>
-        <p class="mb-5 fs-5">Barbershop terbaik dengan rating tinggi dari para pelanggan.</p>
-        <div class="row">
-            @forelse ($popularBarbershops as $barbershop)
-                <div class="col-md-4 mb-4">
-                    <div class="barber-card">
-                        <img src="{{ asset('storage/' . $barbershop->image) }}" alt="{{ $barbershop->name }}">
-                        <div class="p-4">
-                            <h5 class="fw-bold">{{ $barbershop->name }}</h5>
-                            <p><i class="bi bi-pin-map-fill"></i> {{ $barbershop->location }}</p>
-                            @if($barbershop->ratings_count > 0)
-                                <p class="barber-rating"><i class="bi bi-star-fill"></i> {{ $barbershop->averageRating() }} ({{ $barbershop->ratings_count }}+)</p>
-                            @else
-                                <p class="barber-rating text-muted">Belum ada rating</p>
-                            @endif
-                            <a href="{{ route('barbershop.show', $barbershop->id) }}" class="btn btn-gradient btn-sm mt-2"><span>Lihat Detail</span></a>
+        {{-- Carousel Controls --}}
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <section class="section-padding text-center">
+        <div class="container">
+            <h2 class="fw-bold mb-5 section-title">Kenapa Pilih HayuCukur?</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4"><div class="feature-card"><i class="bi bi-calendar2-check feature-icon"></i><h4 class="fw-bold">Booking Mudah</h4><p>Pilih jadwal, kapster, dan layanan sesuai keinginanmu hanya dalam beberapa klik.</p></div></div>
+                <div class="col-md-4 mb-4"><div class="feature-card"><i class="bi bi-scissors feature-icon"></i><h4 class="fw-bold">Banyak Pilihan</h4><p>Temukan barbershop dari potong rambut, jenggot, hingga creambath.</p></div></div>
+                <div class="col-md-4 mb-4"><div class="feature-card"><i class="bi bi-qr-code-scan feature-icon"></i><h4 class="fw-bold">Bayar Praktis</h4><p>Pembayaran aman dan cepat di lokasi atau langsung dari aplikasi.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding text-center" style="background-color: var(--darker);">
+        <div class="container">
+            <h2 class="fw-bold mb-5 section-title"><i class="bi bi-geo-alt-fill me-2"></i>Pilihan Barber Kita</h2>
+            <p class="mb-5 fs-5">Barbershop terbaik dengan rating tinggi dari para pelanggan.</p>
+            <div class="row">
+                @forelse ($popularBarbershops as $barbershop)
+                    <div class="col-md-4 mb-4">
+                        <div class="barber-card">
+                            <img src="{{ asset('storage/' . $barbershop->image) }}" alt="{{ $barbershop->name }}">
+                            <div class="p-4">
+                                <h5 class="fw-bold">{{ $barbershop->name }}</h5>
+                                <p><i class="bi bi-pin-map-fill"></i> {{ $barbershop->location }}</p>
+                                @if($barbershop->ratings_count > 0)
+                                    <p class="barber-rating"><i class="bi bi-star-fill"></i> {{ $barbershop->averageRating() }} ({{ $barbershop->ratings_count }}+)</p>
+                                @else
+                                    <p class="barber-rating text-white-50">Belum ada rating</p>
+                                @endif
+                                <a href="{{ route('barbershop.show', $barbershop->id) }}" class="btn btn-gradient btn-sm mt-2"><span>Lihat Detail</span></a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @empty
-                <div class="col-12">
-                    <p class="text-muted">Belum ada barbershop yang terdaftar.</p>
-                </div>
-            @endforelse
+                @empty
+                    <div class="col-12">
+                        <p class="text-muted">Belum ada barbershop yang terdaftar.</p>
+                    </div>
+                @endforelse
+            </div>
+            <a href="{{ route('dashboard') }}" class="btn btn-gradient mt-4">Lihat Semua Barber</a>
         </div>
-        <a href="{{ route('dashboard') }}" class="btn btn-gradient mt-4">Lihat Semua Barber</a>
-    </div>
-</section>
+    </section>
 
-<section class="section-padding partner-section text-center">
-    <div class="partner-content">
-        <h2 class="fw-bold mb-3">Punya Barbershop?</h2>
-        <p class="lead mb-4">Gabung jadi mitra dan kelola jadwal dengan lebih efisien.</p>
-        <a href="{{ route('pilih-akun-mitra') }}" class="btn btn-gradient btn-lg">Daftar Jadi Mitra</a>
-    </div>
-</section>
-
-<footer class="footer">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 mb-5 mb-lg-0">
-                <h5>HayuCukur</h5>
-                <p class="mt-3">Booking barbershop terdepan untuk gaya rambut modern tanpa ribet.</p>
-                <div class="social-icons mt-4">
-                    <a href="#"><i class="bi bi-instagram"></i></a>
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                    <a href="#"><i class="bi bi-twitter-x"></i></a>
-                    <a href="#"><i class="bi bi-tiktok"></i></a>
+    <section class="section-padding partner-section text-center">
+        <div class="partner-content">
+            <h2 class="fw-bold mb-3">Punya Barbershop?</h2>
+            <p class="lead mb-4">Gabung jadi mitra dan kelola jadwal dengan lebih efisien.</p>
+            <a href="{{ route('pilih-akun-mitra') }}" class="btn btn-gradient btn-lg">Daftar Jadi Mitra</a>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <h5 class="mb-0">HayuCukur</h5>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="text-white-50 mb-0">&copy; 2025 HayuCukur. All Rights Reserved.</p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
-                <h5>Navigasi</h5>
-                <ul class="list-unstyled mt-3">
-                    <li><a href="{{ route('beranda') }}">Beranda</a></li>
-                    <li><a href="{{ route('login') }}">Booking</a></li>
-                    <li><a href="{{ route('dashboard') }}">Pilihan Barber</a></li>
-                </ul>
+        </div>
+    </footer>
+    {{-- <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <h5>HayuCukur</h5>
+                    <p class="mt-3">Booking barbershop terdepan untuk gaya rambut modern tanpa ribet.</p>
+                    <div class="social-icons mt-4">
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#"><i class="bi bi-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <h5>Navigasi</h5>
+                    <ul class="list-unstyled mt-3">
+                        <li><a href="{{ route('beranda') }}">Beranda</a></li>
+                        <li><a href="{{ route('login') }}">Booking</a></li>
+                        <li><a href="{{ route('dashboard') }}">Pilihan Barber</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h5>Kontak Kami</h5>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="bi bi-envelope me-2"></i> hello@hayucukur.com</li>
+                        <li><i class="bi bi-telephone me-2"></i> +62 812 3456 7890</li>
+                        <li><i class="bi bi-geo-alt me-2"></i> Jl. Teknologi No. 123, Jakarta</li>
+                    </ul>
+                </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <h5>Kontak Kami</h5>
-                <ul class="list-unstyled mt-3">
-                    <li><i class="bi bi-envelope me-2"></i> hello@hayucukur.com</li>
-                    <li><i class="bi bi-telephone me-2"></i> +62 812 3456 7890</li>
-                    <li><i class="bi bi-geo-alt me-2"></i> Jl. Teknologi No. 123, Jakarta</li>
-                </ul>
+            <hr class="my-5" />
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p>&copy; 2025 HayuCukur. All Rights Reserved.</p>
+                </div>
             </div>
         </div>
-        <hr class="my-5" />
-        <div class="row">
-            <div class="col-md-6 text-center text-md-start">
-                <p>&copy; 2025 HayuCukur. All Rights Reserved.</p>
-            </div>
-        </div>
-    </div>
-</footer>
+    </footer> --}}  {{-- jika ingin menampilkan lokasi / sosmed / keterangan lain nya --}}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

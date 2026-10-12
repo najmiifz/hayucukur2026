@@ -85,8 +85,23 @@
                         <li class="list-group-item">Belum ada layanan yang ditambahkan.</li>
                     @endforelse
                 </ul>
-
                 <div class="mt-4">
+                    {{-- This section checks if a phone number exists and creates the WhatsApp link --}}
+                    {{-- @if ($barbershop->phone_number)
+                        @php
+                            // Prepares the phone number for the WhatsApp URL
+                            $waNumber = preg_replace('/[^0-9]/', '', $barbershop->phone_number);
+                            if (substr($waNumber, 0, 1) === '0') {
+                                $waNumber = '62' . substr($waNumber, 1);
+                            }
+                        @endphp
+
+                        <a href="https://wa.me/{{ $waNumber }}" target="_blank" class="btn w-100 mb-2" style="background-color: #25D366; color: white;">
+                            <i class="bi bi-whatsapp me-2"></i> Chat di WhatsApp
+                        </a>
+                    @endif --}}
+
+                    {{-- Your original booking button is still here --}}
                     <a href="{{ route('booking.create', $barbershop->id) }}" class="btn btn-danger w-100 p-2">
                         <i class="bi bi-calendar-check"></i> Booking Sekarang
                     </a>

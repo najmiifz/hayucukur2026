@@ -3,6 +3,11 @@
 @section('title', 'Dashboard Mitra')
 
 @section('content')
+    @if(session('success'))
+        <div class="alert alert-success mt-4" style="background-color: #198754; color: white; border: none;">
+            {{ session('success') }}
+        </div>
+    @endif
     <h2 class="fw-bold">Halo, Mitra!</h2>
     <p class="text-white-50">Selamat datang di Dashboard HayuCukur. Berikut adalah ringkasan bisnis Anda hari ini.</p>
 
@@ -47,13 +52,20 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success mt-4" style="background-color: #198754; color: white; border: none;">
-            {{ session('success') }}
+        <div class="card mt-4" style="background-color: #1c1c1c; border-color: #333;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Statistik Booking</h5>
+                    <div class="btn-group" role="group">
+                        <a href="{{ route('dashboard.mitra', ['range' => 'weekly']) }}" class="btn btn-sm {{ request('range', 'weekly') == 'weekly' ? 'btn-gold' : 'btn-outline-gold' }}">7 Hari</a>
+                        <a href="{{ route('dashboard.mitra', ['range' => 'monthly']) }}" class="btn btn-sm {{ request('range') == 'monthly' ? 'btn-gold' : 'btn-outline-gold' }}">30 Hari</a>
+                        <a href="{{ route('dashboard.mitra', ['range' => 'yearly']) }}" class="btn btn-sm {{ request('range') == 'yearly' ? 'btn-gold' : 'btn-outline-gold' }}">1 Tahun</a>
+                    </div>
+                </div>
+                <canvas id="bookingChart"></canvas>
+            </div>
         </div>
-    @endif
+    </div>
 
     {{-- Main Action Cards --}}
     <div class="row mt-4">
@@ -76,3 +88,56 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const initialData = {!! json_encode($initialChartData) !!};
+            const ctx = document.getElementById('bookingChart').getContext('2d');
+
+            // --- 1. Create the Chart Instance ---
+            const bookingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: initialData.labels,
+                    datasets: [{
+                        label: 'Jumlah Booking',
+                        data: initialData.data,
+                        backgroundColor: 'rgba(240, 208, 103, 0.2)',
+                        borderColor: 'rgba(240, 208, 103, 1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                    }]
+                },
+                options: { /* ... Your chart options from before ... */ }
+            });
+
+            // --- 2. Add Event Listeners to Filter Buttons ---
+            document.querySelectorAll('.btn-group .btn').forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent page reload
+
+                    // Update active button style
+                    document.querySelectorAll('.btn-group .btn').forEach(btn => {
+                        btn.classList.remove('btn-gold');
+                        btn.classList.add('btn-outline-gold');
+                    });
+                    this.classList.remove('btn-outline-gold');
+                    this.classList.add('btn-gold');
+
+                    const url = this.href;
+
+                    // --- 3. Fetch New Data and Update Chart ---
+                    fetch(url.replace('dashboard-mitra', 'mitra/chart-data'))
+                        .then(response => response.json())
+                        .then(data => {
+                            bookingChart.data.labels = data.labels;
+                            bookingChart.data.datasets[0].data = data.data;
+                            bookingChart.update(); // Redraw the chart
+                        });
+                });
+            });
+        });
+    </script>
+@endpush

@@ -6,14 +6,14 @@
     <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img src="{{ asset('images/tukangcukur.png') }}" class="d-block w-100" style="height: 400px; object-fit: cover; filter: brightness(50%);" alt="Promo 1">
+                <img src="/images/gambar2.jpg" class="d-block w-100" style="height: 400px; object-fit: cover; filter: brightness(50%);" alt="Promo 1">
                 <div class="carousel-caption d-none d-md-block" style="top: 50%; transform: translateY(-50%);">
                     <h5 style="font-size: 2.5rem; font-weight: bold;">Gaya Baru, Semangat Baru</h5>
                     <p>Temukan potongan rambut yang paling sesuai dengan kepribadian Anda.</p>
                 </div>
             </div>
             <div class="carousel-item">
-                <img src="{{ asset('images/tukangcukur.png') }}" class="d-block w-100" style="height: 400px; object-fit: cover; filter: brightness(50%);" alt="Jadwalkan">
+                <img src="/images/gambar3.jpg" class="d-block w-100" style="height: 400px; object-fit: cover; filter: brightness(50%);" alt="Jadwalkan">
                 <div class="carousel-caption d-none d-md-block" style="top: 50%; transform: translateY(-50%);">
                     <h5 style="font-size: 2.5rem; font-weight: bold;">Jadwalkan Kunjungan Anda</h5>
                     <p>Booking mudah dan cepat, tanpa perlu antre.</p>

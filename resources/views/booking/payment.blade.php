@@ -20,6 +20,9 @@
                     <div>
                         <h6 class="mb-0">{{ $booking->barbershop->name }}</h6>
                         <small class="text-white-50">{{ $booking->barbershop->address }}</small>
+                        @if ($booking->barbershop->phone_number)
+                            <small class="text-white-50"><i class="bi bi-whatsapp"></i> {{ $booking->barbershop->phone_number }}</small>
+                        @endif
                     </div>
                 </div>
                 {{-- FIX: Get all info from the $booking object --}}

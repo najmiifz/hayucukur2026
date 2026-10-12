@@ -8,6 +8,7 @@ use App\Http\Controllers\MitraDashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\MidtransController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -42,12 +43,8 @@ Route::middleware('auth')->group(function (){
     })->name('logout');
 
     // Rute untuk Profile
-    Route::get('profile', function(){
-        if (Auth::user()->role =='mitra'){
-            return app(ProfileController::class)->showMitraProfile();
-        }
-        return app(ProfileController::class)->showPelangganProfile();
-    })->name('profile.show');
+    Route::get('/profile/pelanggan', [ProfileController::class, 'showPelangganProfile'])->name('profile.pelanggan.show');
+    Route::get('/profile/mitra', [ProfileController::class, 'showMitraProfile'])->name('profile.mitra.show');
 
     // Rute untuk mengedit profile
     Route::get('profile/edit', [ProfileController::class, 'showEditForm'])->name('profile.edit');
@@ -88,8 +85,13 @@ Route::middleware(['auth','role:mitra'])->group(function (){ // Added 'auth' for
     Route::put('/mitra/barbershop/{barbershop}', [MitraDashboardController::class, 'update'])->name('mitra.barbershop.update');
     Route::delete('/mitra/barbershop/{barbershop}', [MitraDashboardController::class, 'destroy'])->name('mitra.barbershop.destroy');
 
-    // -- Rute Manajemen Booking --
+    // Rute Manajemen Booking
     Route::get('/mitra/bookings', [MitraDashboardController::class, 'showBookings'])->name('mitra.bookings.index');
     Route::post('/mitra/bookings/{booking}/status', [MitraDashboardController::class, 'updateBookingStatus'])->name('mitra.bookings.status.update');
 
+    // Rute untuk melihat statistik booking secara real-time
+    Route::get('/mitra/chart-data', [MitraDashboardController::class, 'getChartData'])->name('mitra.chart.data');
 });
+
+//Rute Email
+Route::post('/midtrans/notification', [MidtransController::class, 'handleNotification'])->name('midtrans.notification');

@@ -17,14 +17,16 @@ class AuthController extends Controller
             'name'=> 'required',
             'email'=> 'required|email|unique:users',
             'password'=> 'required|min:6|confirmed',
-            'role' => 'required|in:pelanggan,mitra' // Validasi role
+            'role' => 'required|in:pelanggan,mitra', // Validasi role
+            'phone_number' => 'required|string|max:20',
         ]);
 
         $user = User::create([
             'name'=> $request->name,
             'email'=> $request->email,
             'password'=> Hash::make($request->password),
-            'role' => $request->role // Simpan role sesuai input
+            'role' => $request->role, // Simpan role sesuai input
+            'phone_number' => $request->phone_number,
         ]);
 
         Auth::login($user); // Login user setelah registrasi

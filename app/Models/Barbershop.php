@@ -19,7 +19,8 @@ class Barbershop extends Model
         'close_time', // Jam tutup barbershop
         'image', // URL gambar barbershop, optional
         'services', // Layanan yang ditawarkan, disimpan sebagai JSON
-        'average_rating' // Rata-rata rating barbershop
+        'average_rating', // Rata-rata rating barbershop
+        'phone_number', // Nomor telepon barbershop
     ];
     protected $casts = [
         'services' => 'array', // merubah json dari Database ke array PHP

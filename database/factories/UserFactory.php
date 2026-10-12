@@ -26,10 +26,18 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'phone_number' => fake()->unique()->e164PhoneNumber(),
+            'password' => Hash::make('password'),
+            'role' =>  'pelanggan',
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function mitra(): Factory
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'mitra',
+        ]);
     }
 
     /**
