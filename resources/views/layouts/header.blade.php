@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg shadow-sm sticky-top" style="background-color: #1f1f1f;">
     <div class="container">
         <a class="navbar-brand fw-bold" href="{{ route('beranda') }}">
-            <img src="/images/logocukur.png" alt="Logo" style="height: 45px;">
+            <img src="/images/logocukur.png" alt="Logo" style="height: 60px; width: auto;">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             {{-- Custom Toggler Icon for dark theme --}}

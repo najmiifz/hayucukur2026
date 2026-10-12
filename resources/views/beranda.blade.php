@@ -43,8 +43,9 @@
         .nav-link:hover::after { width: 100%; }
         .nav-link:hover { color: #ffffff !important; }
         .hero {
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1596434308512-a0b4117a020a?q=80&w=2070&auto=format&fit=crop');
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ asset('images/tukangcukur.png') }}');
             background-size: cover;
+            background-repeat: no-repeat;
             background-position: center;
             min-height: 90vh;
             position: relative;

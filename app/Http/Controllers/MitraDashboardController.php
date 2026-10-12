@@ -61,9 +61,12 @@ class MitraDashboardController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'required|string',
             'service_name.*' => 'sometimes|string',
-            'service_price.*' => 'sometimes|numeric',
+            'service_price.*' => 'sometimes|numeric|min:0',
+            'service_duration.*' => 'sometimes|integer|min:1',
         ]);
-        $imagePath = $request->file('image')->store('barbershop_images', 'public');
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('barbershop_images', 'public')
+            : null;
 
         $services = [];
         if($request->has('service_name')){
@@ -105,7 +108,19 @@ class MitraDashboardController extends Controller
         if ($barbershop->user_id !== Auth::id()){ // Cek apakah barbershop milik mitra yang sedang login
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengedit barbershop ini.');
         }
-        $data = $request->except(['_token','_method','image']);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string',
+            'location' => 'required|string',
+            'open_time' => 'required|date_format:H:i',
+            'close_time' => 'required|date_format:H:i',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'description' => 'required|string',
+            'service_name.*' => 'sometimes|string',
+            'service_price.*' => 'sometimes|numeric|min:0',
+            'service_duration.*' => 'sometimes|integer|min:1',
+        ]);
+        $data = $request->except(['_token','_method','image','service_name','service_price','service_duration']);
         if ($request->hasFile('image')) {
             if($barbershop->image) // Cek apakah barbershop sudah memiliki gambar
                 Storage::disk('public')->delete($barbershop->image); // Hapus gambar lama jika ada
@@ -114,11 +129,13 @@ class MitraDashboardController extends Controller
         $services = [];
         if($request->has('service_name')){
             foreach ($request->service_name as $key=> $name) {
-                $services[] = [
-                    'name' => $name,
-                    'price' => $request->service_price[$key],
-                    'duration' => $request->service_duration[$key] ?? 30,
-                ];
+                if (isset($request->service_price[$key])) {
+                    $services[] = [
+                        'name' => $name,
+                        'price' => $request->service_price[$key],
+                        'duration' => $request->service_duration[$key] ?? 30,
+                    ];
+                }
             }
         }
         $data['services'] = $services; // Simpan layanan yang ditawarkan
@@ -165,7 +182,9 @@ class MitraDashboardController extends Controller
 
         if ($request->status == 'Selesai') {
             $updateData['completed_at'] = Carbon::now(); // Set waktu penyelesaian booking ke sekarang
-            $updateData['payment_status'] = 'Paid'; // dan juga tandai sebagai terbayar
+            if ($booking->payment_method === 'Bayar Ditempat') {
+                $updateData['payment_status'] = 'Paid';
+            }
         }
         $booking->update($updateData); // Update status booking
 
@@ -173,8 +192,10 @@ class MitraDashboardController extends Controller
     }
 
     private function authorizeBookingManagement(Booking $booking){
-        $barbershop = Barbershop::where('user_id', Auth::id())->first();
-        if (!$barbershop || $booking->barbershop_id !== $barbershop->id){
+        $ownsBarbershop = Barbershop::where('user_id', Auth::id())
+            ->whereKey($booking->barbershop_id)
+            ->exists();
+        if (!$ownsBarbershop){
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengedit Booking');
         }
     }

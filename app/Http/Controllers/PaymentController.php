@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -11,6 +12,8 @@ class PaymentController extends Controller
 {
     public function create(Booking $booking)
     {
+        abort_unless($booking->user_id === Auth::id(), 403, 'Anda tidak memiliki akses ke pembayaran ini.');
+
         // konfigurasi kredential Midtrans dari file Config
         Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production');
@@ -23,12 +26,14 @@ class PaymentController extends Controller
                 'order_id' => 'BOOKING-' . $booking->id . '-' . time(), // Unique Order ID
                 'gross_amount' => $booking->total_price,
             ],
-            'item_details' => [[
-                'id' => $booking->service->id,
-                'price' => $booking->service->price,
-                'quantity' => 1,
-                'name' => 'Booking Layanan: ' . $booking->service->nama,
-            ]],
+            'item_details' => collect($booking->services ?? [])->map(function (array $service, int $index) {
+                return [
+                    'id' => 'service-' . $index,
+                    'price' => $service['price'],
+                    'quantity' => 1,
+                    'name' => 'Layanan: ' . $service['name'],
+                ];
+            })->values()->all(),
             'customer_details' => [
                 'first_name' => $booking->user->name,
                 'email' => $booking->user->email,
@@ -46,7 +51,7 @@ class PaymentController extends Controller
     {
         // Proses webhook dari Midtrans
         //Set Server Key
-        config::$serverKey = config('midtrans.server_key');
+        Config::$serverKey = config('midtrans.server_key');
 
         //Membuat objek Notifikasi
         $notification = new \Midtrans\Notification();
@@ -59,13 +64,15 @@ class PaymentController extends Controller
         $signature_key = hash('sha512', $order_id . $status_code . $gross_amount . config('midtrans.server_key'));
 
         //cek bila signatur key sesuai
-        if ($signature_key != $notification -> signture_key) {
+        if (! hash_equals($signature_key, $notification->signature_key)) {
             return response()->json(['message' => 'Signature key tidak sesuai'], 403);
         }
 
-        //temukan booking berdasarkan order_id
-        $bookingId = explode('-', $order_id)[1];
-        $booking = Booking::find($bookingId);
+        if (!preg_match('/^BOOKING-(\d+)-/', $order_id, $matches)) {
+            return response()->json(['message' => 'Format order ID tidak valid'], 422);
+        }
+
+        $booking = Booking::find($matches[1]);
 
         if (!$booking){
             return response()->json(['message'=> 'Booking tidak ditemukan'], 404);
@@ -74,24 +81,17 @@ class PaymentController extends Controller
         //meng handle status pembayaran
         $transaction = $notification->transaction_status;
         $fraud = $notification->fraud_status;
-        if($transaction == 'capture' || $transaction =='settlement') {
-            if ($fraud == 'accept') {
-                //tandai booking sudah terkonfirmasi
-                $booking->update([
-                'payment_status' => 'Paid',
-                'status' => 'Selesai'
-                ]);
-        } else if ($transaction == 'cancel' || $transaction == 'deny' || $transaction == 'expire') {
-            //tandai booking sebagai dibatalkan/gagal
-            $booking->payment_status = 'dibatalkan';
-            $booking->save();
-        }else if ($transaction == 'pending') {
-            //tandai booking sebagai menunggu pembayaran
-            $booking->payment_status = 'menunggu';
-            $booking->save();
+        if (($transaction === 'capture' || $transaction === 'settlement') && $fraud !== 'deny') {
+            $booking->update(['payment_status' => 'Paid']);
+        } elseif (in_array($transaction, ['cancel', 'deny', 'expire'], true)) {
+            $booking->update([
+                'payment_status' => 'Failed',
+                'status' => 'Dibatalkan',
+            ]);
+        } elseif ($transaction === 'pending') {
+            $booking->update(['payment_status' => 'Pending']);
         }
 
-        return response()->json(['message'=> 'Webhook processed successfully'], 200);
-     }
+        return response()->json(['message' => 'Webhook processed successfully'], 200);
     }
 }

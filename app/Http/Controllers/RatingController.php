@@ -13,14 +13,16 @@ class RatingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'booking_id' => 'required|exist:bookings, id|unique:ratings, booking_id',
-            'barbershop_id' => 'required|exist:barbershop_id',
+            'booking_id' => 'required|exists:bookings,id|unique:ratings,booking_id',
+            'barbershop_id' => 'required|exists:barbershops,id',
             'rating' => 'required|integer|min:1|max:5', // Validasi rating antara 1 sampai 5
             'comment' => 'nullable|string|max:500',
         ]);
 
         $booking = Booking::findOrFail($request->booking_id);
-        if ($booking->user_id !== Auth::id()) {
+        if ($booking->user_id !== Auth::id()
+            || $booking->barbershop_id !== (int) $request->barbershop_id
+            || $booking->status !== 'Selesai') {
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk memberikan rating pada booking ini.');
         }
         Rating::create([

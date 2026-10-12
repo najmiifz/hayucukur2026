@@ -20,19 +20,51 @@ class BookingController extends Controller
     {
         $validatedData = $request->validate([
             'barbershop_id' => 'required|exists:barbershops,id',
-            'services' => 'required|array|min:1', // memastikan setidaknya satu layanan dipilih
+            'services' => 'required|array|min:1',
+            'services.*' => 'string',
             'booking_date' => 'required|date|after_or_equal:today',
             'booking_time' => 'required|date_format:H:i',
-            'total_price' => 'required|numeric|min:0',
         ]);
 
+        $barbershop = Barbershop::findOrFail($validatedData['barbershop_id']);
+        $availableServices = collect($barbershop->services ?? [])->keyBy('name');
+        $requestedServices = collect($validatedData['services']);
+        if ($requestedServices->diff($availableServices->keys())->isNotEmpty()) {
+            return back()->withInput()->withErrors([
+                'services' => 'Salah satu layanan yang dipilih sudah tidak tersedia.',
+            ]);
+        }
+        $selectedServices = $requestedServices->map(fn (string $serviceName) => $availableServices->get($serviceName))
+            ->values()
+            ->all();
+        $totalPrice = collect($selectedServices)->sum(fn (array $service) => (float) ($service['price'] ?? 0));
         $bookingDateTime = Carbon::parse($validatedData['booking_date']. ' ' . $validatedData['booking_time']);
+
+        $openTime = Carbon::parse($validatedData['booking_date'] . ' ' . $barbershop->open_time);
+        $closeTime = Carbon::parse($validatedData['booking_date'] . ' ' . $barbershop->close_time);
+        if (!$bookingDateTime->between($openTime, $closeTime)) {
+            return back()->withInput()->withErrors([
+                'booking_time' => 'Jam booking berada di luar jam operasional barbershop.',
+            ]);
+        }
+
+        $alreadyBooked = Booking::where('barbershop_id', $barbershop->id)
+            ->where('booking_time', $bookingDateTime)
+            ->whereNotIn('status', ['Dibatalkan'])
+            ->exists();
+        if ($alreadyBooked) {
+            return back()->withInput()->withErrors([
+                'booking_time' => 'Jadwal tersebut sudah dipesan. Silakan pilih waktu lain.',
+            ]);
+        }
+
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'barbershop_id' => $validatedData['barbershop_id'],
+            'services' => $selectedServices,
             'name' => Auth::user()->name, // Mengambil nama pengguna yang sedang login
             'booking_time' => $bookingDateTime,
-            'total_price' => $validatedData['total_price'],
+            'total_price' => $totalPrice,
             'status' => 'Menunggu',
             'payment_status' => 'Pending',
             'payment_method' => 'Online', // Default payment method
@@ -45,17 +77,20 @@ class BookingController extends Controller
 
         $params =[
             'transaction_details' => [
-                'order_id' => $booking->id . '-' . time(), // Unique order ID
+                'order_id' => 'BOOKING-' . $booking->id . '-' . time(),
                 'gross_amount' => $booking->total_price,
             ],
             'customer_details' => [
                 'first_name' => $booking->name,
-                'email' => $booking->email,
+                'email' => Auth::user()->email,
             ]
         ];
 
         $snapToken = Snap::getSnapToken($params);
-        $booking->snap_token = $snapToken; // memasang token ke model sementara
+        $booking->update([
+            'order_id' => $params['transaction_details']['order_id'],
+            'snap_token' => $snapToken,
+        ]);
 
         return view('booking.payment', compact('booking'));
     }

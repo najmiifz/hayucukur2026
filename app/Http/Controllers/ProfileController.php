@@ -61,6 +61,9 @@ class ProfileController extends Controller
         $user->email = $request->email;
 
         if ($request->filled('new_password')) {
+            if (!$request->filled('current_password') || !Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'Password lama tidak sesuai.'])->withInput();
+            }
             $user->password = Hash::make($request->new_password);
         }
 

@@ -65,10 +65,6 @@ Route::middleware(['auth', 'role:pelanggan'])->group(function () {
     Route::get('/booking/create/{barbershop}', [BookingController::class, 'create'])->name('booking.create');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 
-    // Rute untuk pembayaran dan konfirmasi booking
-    Route::get('/booking/payment', [BookingController::class, 'showPayment'])->name('booking.payment');
-    Route::post('/booking/confirm', [BookingController::class, 'confirm'])->name('booking.confirm');
-
     // Rute untuk riwayat booking dan pembatalan
     Route::get('/riwayat-booking', [BookingController::class, 'riwayat'])->name('riwayat-booking');
     Route::post('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
@@ -77,6 +73,7 @@ Route::middleware(['auth', 'role:pelanggan'])->group(function () {
     Route::post('/rating', [RatingController::class, 'store'])->name('rating.store');
 
     Route::post('/booking/{booking}/update-to-cod', [BookingController::class, 'updateToPayOnSite'])->name('booking.pay-on-site');
+    Route::get('/payment/{booking}/payment', [PaymentController::class, 'create'])->name('payment.create');
 });
 
 //Rute Mitra
@@ -95,6 +92,4 @@ Route::middleware(['auth','role:mitra'])->group(function (){ // Added 'auth' for
     Route::get('/mitra/bookings', [MitraDashboardController::class, 'showBookings'])->name('mitra.bookings.index');
     Route::post('/mitra/bookings/{booking}/status', [MitraDashboardController::class, 'updateBookingStatus'])->name('mitra.bookings.status.update');
 
-//Rute Pembayaran
-Route::get('/payment/{booking}/payment', [PaymentController::class, 'create'])->name('payment.create)');
 });

@@ -11,17 +11,21 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'barbershop_id',
+        'services',
         'name',
         'booking_time',
         'total_price',
         'status',
         'payment_status',
         'payment_method',
+        'order_id',
+        'snap_token',
         'completed_at'
     ];
 
     protected $casts = [
         'booking_time' => 'datetime',
+        'services' => 'array',
         'total_price' => 'decimal:2', // Asumsi total_price adalah nilai desimal
         'status' => 'string', // Asumsi status adalah string
     ];
